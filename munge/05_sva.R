@@ -8,14 +8,14 @@ library(sva)
 library(here)
 
 # setting data directory
-design_sva <- here("data", "design_sva.RData")
+design_sva <- here("SuperFund/data", "design_sva.RData")
 
 # only load data from norm_data if cellcorr_data does not exist
 if (!file.exists(normalizePath(design_sva))) {
 
   print("design_sva object not found; retrieving batchcorr_data..")
 
-  pheno_PS <- read.csv(file=here("data", "pheno_PS.csv"))
+  pheno_PS <- read.csv(file=here("SuperFund/data", "pheno_PS.csv"))
   rownames(pheno_PS) <- pheno_PS[,1]
   pheno_PS <- pheno_PS[,-1]
 
@@ -77,18 +77,28 @@ if (!file.exists(normalizePath(design_sva))) {
 
   mvals_combat <- mvals_Illumina_combat
   # mvals_combat <- mvals_combat[,!colnames(mvals_combat) %in% dropList]
-
-  design_sva_dich <- run_sva(mvals = mvals_combat, var = dich_tce)
-  design_sva_C <- run_sva(mvals = mvals_combat, var = TCE_M_C)
-  design_sva_ppm <- run_sva(mvals = mvals_combat, var = log(tce_ppm))
-  save(design_SV, file = here("data", "design_smk.RData"))
+  mod0 <- model.matrix(~1, data=pheno_PS)
+  #design_sva_fa <- run_sva(mvals = mvals_combat, var = fa)
+  
+  mod_fa <- model.matrix(~fa, data=pheno_PS)
+  sva_fa <- sva(mvals_combat, mod_fa, mod0,  n.sv = 9)
+  design_sva_fa <- cbind(mod_fa, sva_fa$sv)
+  
+  #design_sva_C <- run_sva(mvals = mvals_combat, var = TCE_M_C)
+  
+  mod_ppm <- model.matrix(~log(fa_ppm), data=pheno_PS)
+  sva_ppm <- sva(mvals_combat, mod_ppm, mod0,  n.sv = 9)
+  #design_sva_ppm <- run_sva(mvals = mvals_combat, var = log(fa_ppm))
+  design_sva_ppm <- cbind(mod_ppm, sva_ppm$sv)
+  
+  #save(design_SV, file = here("data", "design_smk.RData"))
 
   #############################################################################
   ###### save the relevant data
   #############################################################################
 
-  save(design_sva_dich, design_sva_C, design_sva_ppm,
-    file = here("data", "design_sva.RData"))
+  save(design_sva_fa, design_sva_ppm,
+    file = here("SuperFund/data", "design_sva.RData"))
 
   } else {
    load(design_sva)
