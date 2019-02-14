@@ -36,14 +36,13 @@ if (!file.exists(normalizePath(batchcorr_data_data))) {
 
   load(here("data","norm_data.RData"))
 
-   # =========== TO DO: Run illumina first  ============= #
   mvals_Illumina_combat <- run_combat(mvals=mvals_Illumina)
 
 #############################################################################
 ###### save the relevant data
 #############################################################################
 
-save(mvals_Illumina_combat, file = here("data", "batchcorr_data.RData"))
+save(mvals_Illumina_combat, file = here("SuperFund/data", "batchcorr_data.RData"))
 
 } else {
  load(batchcorr_data)

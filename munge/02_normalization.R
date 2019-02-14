@@ -69,12 +69,12 @@ if (!file.exists(normalizePath(norm_data))) {
   illumina <- ratioConvert(illumina, what = "beta", keepCN = TRUE)
   illumina <- mapToGenome(illumina)
   ## =================== Question: What's mavls_combat??? =========== #
-  assays(illumina)$M <- mvals_combat
+  #assays(illumina)$M <- mvals_combat
   newBetas <- Harman::shiftBetas(betas, shiftBy=1e-4)
   mvals_Illumina <- B2M(newBetas)
   betas_Illumina <- M2B(mvals_Illumina)
   dim(betas_Illumina)
-  # [1] 399439    140
+  # [1] 403610     67
 
   ################################# Quantile ##################################
 
@@ -157,16 +157,21 @@ if (!file.exists(normalizePath(norm_data))) {
   
   
   
-  save(betas_ENmix_BMIQ, mvals_ENmix_BMIQ,
-    betas_ENmix_RCP, mvals_ENmix_RCP,
-    betas_Funnorm, mvals_Funnorm,
-    betas_Illumina, mvals_Illumina,
+  # save(betas_ENmix_BMIQ, mvals_ENmix_BMIQ,
+  #   betas_ENmix_RCP, mvals_ENmix_RCP,
+  #   betas_Funnorm, mvals_Funnorm,
+  #   betas_Illumina, mvals_Illumina,
+  #   betas_Quantile, mvals_Quantile,
+  #   betas_Raw, mvals_Raw,
+  #   betas_Noob, mvals_Noob,
+  #   betas_SWAN_ENmix, mvals_SWAN_ENmix,
+  #   betas_SWAN_Noob, mvals_SWAN_Noob,
+  # file = here("data", "norm_data.RData"))
+  
+   save(betas_Illumina, mvals_Illumina,
     betas_Quantile, mvals_Quantile,
-    betas_Raw, mvals_Raw,
-    betas_Noob, mvals_Noob,
-    betas_SWAN_ENmix, mvals_SWAN_ENmix,
-    betas_SWAN_Noob, mvals_SWAN_Noob,
-  file = here("data", "norm_data.RData"))
+   file = here("SuperFund/data", "norm_data.RData"))
+  
 
 } else {
    load(norm_data)
