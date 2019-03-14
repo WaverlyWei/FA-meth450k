@@ -1,49 +1,27 @@
-################################################################################
-# In this script we use the normalized data sets and remove unwanted variation
-# from batches (Sample_Plate) with ComBat.
-################################################################################
-
-# Set up workspace
+##############################################################################
+# ComBat
+# The ComBat function adjusts for known batches using an empirical Bayesian
+# framework. ComBat allows users to adjust for batch effects in datasets where
+# the batch cov is known, using methodology described in Johnson et al. 2007.
+##############################################################################
 library(sva)
 library(here)
 
-# setting data directory
-batchcorr_data <- here("data", "batchcorr_data.RData")
+source(here("SuperFund/munge","utils.R"))
 
-# only load data from norm_data if batchcorr_data does not exist
-if (!file.exists(normalizePath(batchcorr_data_data))) {
+pheno <- read.csv(here("SuperFund/data", "pheno_all.csv"))
+sapply(pheno, class)
+pheno <- run_class(pheno, fac = c(5,6,8,11:13), num = c(9,14:23))
+rownames(pheno) <- pheno$Target_ID
 
-  print("batchcorr_data object not found; attempting to retrieve norm_data..")
+load(here("SuperFund/data", "filtered.RData"))
 
-  pheno_PS <- read.csv(file=here("SuperFund/data", "pheno_PS.csv"))
-  rownames(pheno_PS) <- pheno_PS[,1]
-  pheno_PS <- pheno_PS[,-1]
+batch <- pheno$Sample_Plate
+mod <- model.matrix(~fa+sex+age+infection+Gran_est+Mono_est+Bcell_est+
+                      NK_est+CD4T_est+CD8T_est, data=pheno)
 
- ##############################################################################
- # ComBat
- # The ComBat function adjusts for known batches using an empirical Bayesian
- # framework. ComBat allows users to adjust for batch effects in datasets where
- # the batch cov is known, using methodology described in Johnson et al. 2007.
- ##############################################################################
 
- run_combat <- function(mvals, batch = pheno_PS$Sample_Plate) {
+mvals_combat <- ComBat(dat = mvals, batch, mod)
 
-   mvals_combat <- ComBat(dat = mvals, batch)
-   return(mvals_combat)
-  }
-
-# apply these functions to the normalizations
-
-  load(here("data","norm_data.RData"))
-
-  mvals_Illumina_combat <- run_combat(mvals=mvals_Illumina)
-
-#############################################################################
-###### save the relevant data
-#############################################################################
-
-save(mvals_Illumina_combat, file = here("SuperFund/data", "batchcorr_data.RData"))
-
-} else {
- load(batchcorr_data)
-}
+save(mvals_combat,file = here("SuperFund/data", "combat.RData"),
+     compress = TRUE)
